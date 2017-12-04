@@ -1,6 +1,6 @@
-export function getClosestSlider( position ) {
-    const firstSlider = document.querySelector( ".draggable.first" );
-    const secondSlider = document.querySelector( ".draggable.second" );
+export function getClosestSlider( position, parentContainer ) {
+    const firstSlider = parentContainer.querySelector( ".draggable.first" );
+    const secondSlider = parentContainer.querySelector( ".draggable.second" );
 
     const firstSliderOffset = parseInt( firstSlider.getBoundingClientRect().left, 10 );
     const secondSliderOffset = parseInt( secondSlider.getBoundingClientRect().left, 10 );

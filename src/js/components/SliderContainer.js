@@ -1,29 +1,21 @@
+/* eslint react/prop-types: off */
 import React from "react";
 import RangeSlider from "./RangeSlider";
 
-export default class SliderContainer extends React.Component {
-    constructor() {
-        super();
-        this.state = {
-            minimum: 0,
-            maximum: 1000,
-            initialValueFirst: 100,
-            initialValueSecond: 500,
-            width: 700,
-        };
-    }
+export default function SliderContainer( props ) {
+    const {
+        containerName, width, minimum, maximum, initialValueFirst, initialValueSecond,
+    } = props;
+    return (
+        <div className={ containerName } style={ { width } }>
+            <RangeSlider
+                parentClass={ containerName }
+                minimum={ minimum }
+                maximum={ maximum }
+                initialValueFirst={ initialValueFirst }
+                initialValueSecond={ initialValueSecond }
 
-    render() {
-        return (
-            <div className="custom-container" style={ { width: this.state.width } }>
-                <RangeSlider
-                    minimum={ this.state.minimum }
-                    maximum={ this.state.maximum }
-                    initialValueFirst={ this.state.initialValueFirst }
-                    initialValueSecond={ this.state.initialValueSecond }
-
-                />
-            </div>
-        );
-    }
+            />
+        </div>
+    );
 }

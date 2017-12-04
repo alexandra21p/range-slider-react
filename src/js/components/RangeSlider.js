@@ -16,13 +16,15 @@ export default class RangeSlider extends React.Component {
     }
 
     componentDidMount() {
-        const rangeContainer = document.querySelector( ".range-container" );
+        const parentContainer = document.querySelector( `.${ this.props.parentClass }` );
+        const rangeContainer = parentContainer.querySelector( ".range-container" );
         const parentProperties = rangeContainer.getBoundingClientRect();
         const parentWidth = parseInt( parentProperties.width, 10 );
         const parentLeftOffset = parentProperties.left;
         const { firstHandleOffset, secondHandleOffset } = this.computeLeftOffset( parentWidth );
 
         this.setState( {
+            parentContainer,
             parentWidth,
             parentLeftOffset,
             firstHandleOffset,
@@ -36,8 +38,9 @@ export default class RangeSlider extends React.Component {
     }
 
     setInitialCoordinates( evt ) {
+        const { parentContainer } = this.state;
         const position = evt.clientX;
-        const closest = getClosestSlider( position );
+        const closest = getClosestSlider( position, parentContainer );
 
         this.setState( {
             canMove: true,
