@@ -12,17 +12,17 @@ const firstObject = {
     initialValueSecond: 350,
 };
 
-const secondObject = {
-    containerName: "second-custom-slider-container",
-    width: 700,
-    minimum: 0,
-    maximum: 1000,
-    initialValueFirst: 100,
-    initialValueSecond: 500,
-};
+// const secondObject = {
+//     containerName: "second-custom-slider-container",
+//     width: 700,
+//     minimum: 0,
+//     maximum: 1000,
+//     initialValueFirst: 100,
+//     initialValueSecond: 500,
+// };
 
 const firstContainer = document.querySelector( ".first-container" );
-const secondContainer = document.querySelector( ".second-container" );
+// const secondContainer = document.querySelector( ".second-container" );
 
 ReactDOM.render( <SliderContainer { ...firstObject } />, firstContainer );
-ReactDOM.render( <SliderContainer { ...secondObject } />, secondContainer );
+// ReactDOM.render( <SliderContainer { ...secondObject } />, secondContainer );
