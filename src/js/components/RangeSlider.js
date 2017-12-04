@@ -1,6 +1,7 @@
 /* eslint react/prop-types: off, react/no-unused-state: off, react/no-did-mount-set-state: off */
 import React from "react";
 import SliderHandle from "./SliderHandle";
+import { getClosestSlider, setCurrentHandleValues } from "../utilities/utils";
 
 export default class RangeSlider extends React.Component {
     constructor( props ) {
@@ -20,14 +21,13 @@ export default class RangeSlider extends React.Component {
         const parentWidth = parseInt( parentProperties.width, 10 );
         const parentLeftOffset = parentProperties.left;
         const { firstHandleOffset, secondHandleOffset } = this.computeLeftOffset( parentWidth );
-        // const secondSliderOffset = this.computeLeftOffset( parentWidth );
 
         this.setState( {
             parentWidth,
             parentLeftOffset,
             firstHandleOffset,
             secondHandleOffset,
-        } );
+        }, this.renderProgressBar );
     }
 
     componentWillUnmount() {
@@ -36,23 +36,35 @@ export default class RangeSlider extends React.Component {
     }
 
     setInitialCoordinates( evt ) {
-        const { parentLeftOffset, parentWidth } = this.state;
         const position = evt.clientX;
-        const updatedOffset = Math.min( Math.max( position - parentLeftOffset, 0 ), parentWidth );
-        const updatedSliderValue = this.changeCurrentValue( updatedOffset );
+        const closest = getClosestSlider( position );
 
         this.setState( {
             canMove: true,
-            sliderOffset: updatedOffset,
-            currentValue: updatedSliderValue,
+            closestSlider: closest,
         } );
 
+        this.updateValues( position, closest );
         this.addBodyEvents();
         evt.preventDefault();
     }
 
+    updateValues( position, closest ) {
+        const { parentLeftOffset, parentWidth } = this.state;
+        const updatedOffset = Math.min( Math.max( position - parentLeftOffset, 0 ), parentWidth );
+        const updatedSliderValue = this.changeCurrentValue( updatedOffset );
+
+        this.setState(
+            setCurrentHandleValues( closest, updatedOffset, updatedSliderValue ),
+            this.renderProgressBar,
+        );
+    }
+
     moveSlider( evt ) {
-        const { canMove, parentLeftOffset, parentWidth } = this.state;
+        const {
+            canMove, parentLeftOffset, parentWidth, closestSlider,
+        } = this.state;
+
         if ( !canMove ) {
             return;
         }
@@ -63,23 +75,16 @@ export default class RangeSlider extends React.Component {
         const updatedOffset = computedPosition - parentLeftOffset;
         const updatedSliderValue = this.changeCurrentValue( updatedOffset );
 
-        this.setState( {
-            sliderOffset: updatedOffset,
-            currentValue: updatedSliderValue,
-        } );
-
-        // this.renderProgressBar();
-        // evt.preventDefault();
-        // evt.stopPropagation();
+        this.setState(
+            setCurrentHandleValues( closestSlider, updatedOffset, updatedSliderValue ),
+            this.renderProgressBar,
+        );
     }
 
     handleMouseUp( ) {
         this.setState( {
             canMove: false,
         } );
-
-        // evt.preventDefault();
-        // evt.stopPropagation();
     }
 
     changeCurrentValue( leftOffset ) {
@@ -88,13 +93,12 @@ export default class RangeSlider extends React.Component {
     }
 
     computeLeftOffset( parentWidth ) {
-        const unitPerPixel = this.props.maximum / parseInt( parentWidth, 10 );
-        const firstHandleValue = !this.state.currentValueFirst ? this.props.initialValueFirst : this.state.currentValueFirst;
-        const secondHandleValue = !this.state.currentValueSecond ? this.props.initialValueSecond : this.state.currentValueSecond;
+        const { initialValueFirst, initialValueSecond, maximum } = this.props;
+        const unitPerPixel = maximum / parseInt( parentWidth, 10 );
 
         return {
-            firstHandleOffset: firstHandleValue / unitPerPixel,
-            secondHandleOffset: secondHandleValue / unitPerPixel,
+            firstHandleOffset: initialValueFirst / unitPerPixel,
+            secondHandleOffset: initialValueSecond / unitPerPixel,
         };
     }
 
@@ -103,15 +107,35 @@ export default class RangeSlider extends React.Component {
         document.body.addEventListener( "mouseup", this.handleMouseUp );
     }
 
+    renderProgressBar() {
+        const { firstHandleOffset, secondHandleOffset } = this.state;
+        const minimumOffsetValue = Math.min( firstHandleOffset, secondHandleOffset );
+        const maximumOffsetValue = Math.max( firstHandleOffset, secondHandleOffset );
+
+        this.setState( {
+            progressBarWidth: maximumOffsetValue - minimumOffsetValue,
+            progressBarOffset: minimumOffsetValue,
+        } );
+    }
+
     render() {
-        const { currentValue } = this.state;
-        const value = currentValue === undefined ? this.props.initialValue : currentValue;
+        const {
+            firstHandleValue, secondHandleValue, firstHandleOffset,
+            secondHandleOffset, progressBarWidth, progressBarOffset,
+        } = this.state;
+        const {
+            minimum, maximum, initialValueFirst, initialValueSecond,
+        } = this.props;
+
+        const firstValue = firstHandleValue === undefined ? initialValueFirst : firstHandleValue;
+        const secondValue = secondHandleValue === undefined
+            ? initialValueSecond : secondHandleValue;
 
         return (
             <div className="slider-container">
                 <div className="range-value">
                     <h2>min</h2>
-                    <span className="min-value">{this.props.minimum}</span>
+                    <span className="min-value">{ minimum }</span>
                 </div>
                 <div
                     className="range-container"
@@ -121,22 +145,26 @@ export default class RangeSlider extends React.Component {
                 >
                     <SliderHandle
                         name="first"
-                        left={ this.state.firstHandleOffset }
-                        value={ value }
+                        left={ firstHandleOffset }
+                        value={ firstValue }
                     />
 
                     <SliderHandle
                         name="second"
-                        left={ this.state.secondHandleOffset }
-                        value={ value }
+                        left={ secondHandleOffset }
+                        value={ secondValue }
                     />
-                    <div className="progress-bar">
-                        <span />
-                    </div>
+                    <div
+                        className="progress-bar"
+                        style={ {
+                            width: `${ progressBarWidth }px`,
+                            left: `${ progressBarOffset }px`,
+                        } }
+                    />
                 </div>
                 <div className="range-value">
                     <h2>max</h2>
-                    <span className="max-value">{this.props.maximum}</span>
+                    <span className="max-value">{ maximum }</span>
                 </div>
             </div>
 
