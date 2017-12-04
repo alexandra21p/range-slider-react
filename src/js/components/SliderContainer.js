@@ -2,7 +2,7 @@
 import React from "react";
 import RangeSlider from "./RangeSlider";
 
-export default function SliderContainer( props ) {
+export default function SliderContainer ( props ) {
     const {
         containerName, width, minimum, maximum, initialValueFirst, initialValueSecond,
     } = props;
@@ -17,5 +17,6 @@ export default function SliderContainer( props ) {
 
             />
         </div>
+
     );
 }

@@ -17,10 +17,12 @@ export function setCurrentHandleValues( closest, updatedOffset, updatedSliderVal
         return {
             firstHandleOffset: updatedOffset,
             firstHandleValue: updatedSliderValue,
+            closestSlider: closest,
         };
     }
     return {
         secondHandleOffset: updatedOffset,
         secondHandleValue: updatedSliderValue,
+        closestSlider: closest,
     };
 }

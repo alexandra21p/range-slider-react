@@ -8,7 +8,7 @@ const firstObject = {
     width: 500,
     minimum: 0,
     maximum: 500,
-    initialValueFirst: 10,
+    initialValueFirst: 50,
     initialValueSecond: 350,
 };
 

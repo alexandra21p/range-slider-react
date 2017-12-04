@@ -1,4 +1,4 @@
-/* eslint react/prop-types: off, react/no-unused-state: off, react/no-did-mount-set-state: off */
+/* eslint react/prop-types: off, react/no-did-mount-set-state: off */
 import React from "react";
 import SliderHandle from "./SliderHandle";
 import { getClosestSlider, setCurrentHandleValues } from "../utilities/utils";
@@ -7,9 +7,15 @@ export default class RangeSlider extends React.Component {
     constructor( props ) {
         super( props );
         this.state = {
-            canMove: false,
+            firstHandleOffset: 0,
+            secondHandleOffset: 0,
+            progressBarWidth: 0,
+            progressBarOffset: 0,
+            firstHandleValue: this.props.initialValueFirst,
+            secondHandleValue: this.props.initialValueSecond,
         };
 
+        this.canMove = false;
         this.setInitialCoordinates = this.setInitialCoordinates.bind( this );
         this.moveSlider = this.moveSlider.bind( this );
         this.handleMouseUp = this.handleMouseUp.bind( this );
@@ -30,6 +36,8 @@ export default class RangeSlider extends React.Component {
             firstHandleOffset,
             secondHandleOffset,
         }, this.renderProgressBar );
+
+        this.addBodyEvents();
     }
 
     componentWillUnmount() {
@@ -42,13 +50,8 @@ export default class RangeSlider extends React.Component {
         const position = evt.clientX;
         const closest = getClosestSlider( position, parentContainer );
 
-        this.setState( {
-            canMove: true,
-            closestSlider: closest,
-        } );
-
         this.updateValues( position, closest );
-        this.addBodyEvents();
+        this.canMove = true;
         evt.preventDefault();
     }
 
@@ -57,18 +60,19 @@ export default class RangeSlider extends React.Component {
         const updatedOffset = Math.min( Math.max( position - parentLeftOffset, 0 ), parentWidth );
         const updatedSliderValue = this.changeCurrentValue( updatedOffset );
 
+        const updatedState = setCurrentHandleValues( closest, updatedOffset, updatedSliderValue );
         this.setState(
-            setCurrentHandleValues( closest, updatedOffset, updatedSliderValue ),
+            updatedState,
             this.renderProgressBar,
         );
     }
 
     moveSlider( evt ) {
         const {
-            canMove, parentLeftOffset, parentWidth, closestSlider,
+            parentLeftOffset, parentWidth, closestSlider: closest,
         } = this.state;
 
-        if ( !canMove ) {
+        if ( !this.canMove ) {
             return;
         }
 
@@ -78,16 +82,15 @@ export default class RangeSlider extends React.Component {
         const updatedOffset = computedPosition - parentLeftOffset;
         const updatedSliderValue = this.changeCurrentValue( updatedOffset );
 
+        const updatedState = setCurrentHandleValues( closest, updatedOffset, updatedSliderValue );
         this.setState(
-            setCurrentHandleValues( closestSlider, updatedOffset, updatedSliderValue ),
+            updatedState,
             this.renderProgressBar,
         );
     }
 
     handleMouseUp( ) {
-        this.setState( {
-            canMove: false,
-        } );
+        this.canMove = false;
     }
 
     changeCurrentValue( leftOffset ) {
@@ -126,13 +129,11 @@ export default class RangeSlider extends React.Component {
             firstHandleValue, secondHandleValue, firstHandleOffset,
             secondHandleOffset, progressBarWidth, progressBarOffset,
         } = this.state;
-        const {
-            minimum, maximum, initialValueFirst, initialValueSecond,
-        } = this.props;
+        const { minimum, maximum } = this.props;
 
-        const firstValue = firstHandleValue === undefined ? initialValueFirst : firstHandleValue;
-        const secondValue = secondHandleValue === undefined
-            ? initialValueSecond : secondHandleValue;
+        // const firstValue = firstHandleValue === undefined ? initialValueFirst : firstHandleValue;
+        // const secondValue = secondHandleValue === undefined
+        //     ? initialValueSecond : secondHandleValue;
 
         return (
             <div className="slider-container">
@@ -149,13 +150,13 @@ export default class RangeSlider extends React.Component {
                     <SliderHandle
                         name="first"
                         left={ firstHandleOffset }
-                        value={ firstValue }
+                        value={ firstHandleValue }
                     />
 
                     <SliderHandle
                         name="second"
                         left={ secondHandleOffset }
-                        value={ secondValue }
+                        value={ secondHandleValue }
                     />
                     <div
                         className="progress-bar"
