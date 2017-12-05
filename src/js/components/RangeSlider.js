@@ -29,7 +29,10 @@ export default class RangeSlider extends React.Component {
         const parentProperties = this.rangeContainer.getBoundingClientRect();
         const parentWidth = parseInt( parentProperties.width, 10 );
         const parentLeftOffset = parentProperties.left;
-        const { firstHandleOffset, secondHandleOffset } = this.computeLeftOffset( parentWidth );
+        const {
+            firstHandleOffset,
+            secondHandleOffset,
+        } = this.setSlidersInitialOffset( parentWidth );
 
         this.setState( {
             parentWidth,
@@ -58,6 +61,16 @@ export default class RangeSlider extends React.Component {
         return closestSlider;
     }
 
+    setSlidersInitialOffset( parentWidth ) {
+        const { initialValueFirst, initialValueSecond, maximum } = this.props;
+        const unitPerPixel = maximum / parseInt( parentWidth, 10 );
+
+        return {
+            firstHandleOffset: initialValueFirst / unitPerPixel,
+            secondHandleOffset: initialValueSecond / unitPerPixel,
+        };
+    }
+
     updateValues( position, closest ) {
         const { parentLeftOffset, parentWidth } = this.state;
         const updatedOffset = Math.min( Math.max( position - parentLeftOffset, 0 ), parentWidth );
@@ -73,16 +86,6 @@ export default class RangeSlider extends React.Component {
     changeCurrentValue( leftOffset ) {
         const unitPerPixel = this.props.maximum / parseInt( this.state.parentWidth, 10 );
         return Math.round( leftOffset * unitPerPixel );
-    }
-
-    computeLeftOffset( parentWidth ) {
-        const { initialValueFirst, initialValueSecond, maximum } = this.props;
-        const unitPerPixel = maximum / parseInt( parentWidth, 10 );
-
-        return {
-            firstHandleOffset: initialValueFirst / unitPerPixel,
-            secondHandleOffset: initialValueSecond / unitPerPixel,
-        };
     }
 
     handleMouseDown( evt ) {
