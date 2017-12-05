@@ -8,13 +8,15 @@ export default class SliderHandle extends React.Component {
     }
 
     render() {
+        const { name, left, value } = this.props;
+
         return (
             <div
-                className={ `draggable ${ this.props.name }` }
-                style={ { left: `${ this.props.left }px` } }
+                className={ `draggable ${ name }` }
+                style={ { left: `${ left }px` } }
             >
                 <div className="slider-value">
-                    { this.props.value }
+                    { value }
                 </div>
                 <div className="slider-handle" />
             </div>
